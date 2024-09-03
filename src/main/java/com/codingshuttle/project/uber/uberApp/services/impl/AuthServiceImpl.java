@@ -12,6 +12,7 @@ import com.codingshuttle.project.uber.uberApp.services.RiderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
 import java.util.Set;
 
 @Service
@@ -22,7 +23,6 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RiderService riderService;
 
-    // TODO: Implement this
     @Override
     public String login(String email, String password) {
         return "";
@@ -31,7 +31,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserDTO signup(SignUpDTO signUpDTO) {
         User existingUser = userRepository.findByEmail(signUpDTO.getEmail())
-                .orElseThrow(() -> new RuntimeConflictException("Cannot Signup! A user with this email already exists!"));
+                .orElse(null);
+        if (existingUser != null) {
+            throw new RuntimeConflictException("Cannot Signup! A user with this email already exists!");
+        }
         User user = modelMapper.map(signUpDTO, User.class);
         user.setRoles(Set.of(Role.RIDER));
         User savedUser = userRepository.save(user);
