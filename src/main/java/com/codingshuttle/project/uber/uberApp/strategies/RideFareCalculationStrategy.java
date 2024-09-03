@@ -1,9 +1,12 @@
 package com.codingshuttle.project.uber.uberApp.strategies;
 
 import com.codingshuttle.project.uber.uberApp.dto.RideRequestDTO;
+import com.codingshuttle.project.uber.uberApp.entities.RideRequest;
 
 public interface RideFareCalculationStrategy {
 
-    double calculateFare(RideRequestDTO rideRequestDTO);
+    double RIDE_FARE_MULTIPLIER = 10;
+
+    double calculateFare(RideRequest rideRequestDTO);
 
 }
