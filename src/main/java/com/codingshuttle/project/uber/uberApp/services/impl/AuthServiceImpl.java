@@ -5,13 +5,13 @@ import com.codingshuttle.project.uber.uberApp.dto.SignUpDTO;
 import com.codingshuttle.project.uber.uberApp.dto.UserDTO;
 import com.codingshuttle.project.uber.uberApp.entities.User;
 import com.codingshuttle.project.uber.uberApp.entities.enums.Role;
+import com.codingshuttle.project.uber.uberApp.exceptions.RuntimeConflictException;
 import com.codingshuttle.project.uber.uberApp.repositories.UserRepository;
 import com.codingshuttle.project.uber.uberApp.services.AuthService;
 import com.codingshuttle.project.uber.uberApp.services.RiderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-
 import java.util.Set;
 
 @Service
@@ -30,15 +30,15 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserDTO signup(SignUpDTO signUpDTO) {
-        User existingUser = userRepository.findByEmail(signUpDTO.getEmail());
-        if (existingUser != null) {
-            throw new RuntimeException("Cannot Signup! A user with this email already exists!");
-        }
+        User existingUser = userRepository.findByEmail(signUpDTO.getEmail())
+                .orElseThrow(() -> new RuntimeConflictException("Cannot Signup! A user with this email already exists!"));
         User user = modelMapper.map(signUpDTO, User.class);
         user.setRoles(Set.of(Role.RIDER));
         User savedUser = userRepository.save(user);
 
         // Create User related entities
+        riderService.createRider(savedUser);
+        // TODO: Add wallet service and create a wallet here
 
 
         return modelMapper.map(savedUser, UserDTO.class);

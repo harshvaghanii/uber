@@ -30,8 +30,6 @@ public class RiderServiceImpl implements RiderService {
     private final ModelMapper modelMapper;
     private final RideFareCalculationStrategy rideFareCalculationStrategy;
     private final DriverMatchingStrategy driverMatchingStrategy;
-
-
     private final RiderRepository riderRepository;
 
     @Override
