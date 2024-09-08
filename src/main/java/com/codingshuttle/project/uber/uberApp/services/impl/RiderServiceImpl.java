@@ -5,20 +5,17 @@ import com.codingshuttle.project.uber.uberApp.dto.RideDTO;
 import com.codingshuttle.project.uber.uberApp.dto.RideRequestDTO;
 import com.codingshuttle.project.uber.uberApp.entities.Driver;
 import com.codingshuttle.project.uber.uberApp.entities.RideRequest;
+import com.codingshuttle.project.uber.uberApp.entities.Rider;
+import com.codingshuttle.project.uber.uberApp.entities.User;
 import com.codingshuttle.project.uber.uberApp.entities.enums.RideRequestStatus;
 import com.codingshuttle.project.uber.uberApp.exceptions.ResourceNotFoundException;
 import com.codingshuttle.project.uber.uberApp.repositories.RideRequestRepository;
-import com.codingshuttle.project.uber.uberApp.entities.Rider;
-import com.codingshuttle.project.uber.uberApp.entities.User;
 import com.codingshuttle.project.uber.uberApp.repositories.RiderRepository;
 import com.codingshuttle.project.uber.uberApp.services.RiderService;
-import com.codingshuttle.project.uber.uberApp.strategies.DriverMatchingStrategy;
-import com.codingshuttle.project.uber.uberApp.strategies.RideFareCalculationStrategy;
 import com.codingshuttle.project.uber.uberApp.strategies.RideStrategyManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,10 +38,10 @@ public class RiderServiceImpl implements RiderService {
         rideRequest.setRideRequestStatus(RideRequestStatus.PENDING);
 
         Double fare = rideStrategyManager.rideFareCalculationStrategy().calculateFare(rideRequest);
-        rideStrategyManager.driverMatchingStrategy(rider.getRating()).findMatchingDrivers(rideRequest);
-
         rideRequest.setFare(fare);
         rideRequest.setRider(rider);
+        List<Driver> drivers = rideStrategyManager.driverMatchingStrategy(rider.getRating()).findMatchingDrivers(rideRequest);
+        // TODO: Send Notification to all the drivers
         RideRequest savedRideRequest = rideRequestRepository.save(rideRequest);
 
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
