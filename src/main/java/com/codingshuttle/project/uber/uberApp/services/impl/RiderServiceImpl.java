@@ -44,6 +44,7 @@ public class RiderServiceImpl implements RiderService {
         rideStrategyManager.driverMatchingStrategy(rider.getRating()).findMatchingDrivers(rideRequest);
 
         rideRequest.setFare(fare);
+        rideRequest.setRider(rider);
         RideRequest savedRideRequest = rideRequestRepository.save(rideRequest);
 
         return modelMapper.map(savedRideRequest, RideRequestDTO.class);
