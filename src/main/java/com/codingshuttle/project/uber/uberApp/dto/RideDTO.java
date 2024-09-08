@@ -5,7 +5,6 @@ import com.codingshuttle.project.uber.uberApp.entities.enums.RideStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
 
@@ -15,9 +14,9 @@ import java.time.LocalDateTime;
 public class RideDTO {
     private Long id;
 
-    private Point pickupLocation;
+    private PointDTO pickupLocation;
 
-    private Point dropOffLocation;
+    private PointDTO dropOffLocation;
 
     private LocalDateTime requestedTime;
 

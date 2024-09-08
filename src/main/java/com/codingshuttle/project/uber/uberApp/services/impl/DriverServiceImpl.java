@@ -7,6 +7,7 @@ import com.codingshuttle.project.uber.uberApp.entities.Driver;
 import com.codingshuttle.project.uber.uberApp.entities.Ride;
 import com.codingshuttle.project.uber.uberApp.entities.RideRequest;
 import com.codingshuttle.project.uber.uberApp.entities.enums.RideRequestStatus;
+import com.codingshuttle.project.uber.uberApp.entities.enums.RideStatus;
 import com.codingshuttle.project.uber.uberApp.exceptions.ResourceNotFoundException;
 import com.codingshuttle.project.uber.uberApp.repositories.DriverRepository;
 import com.codingshuttle.project.uber.uberApp.services.DriverService;
@@ -17,6 +18,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -39,7 +42,9 @@ public class DriverServiceImpl implements DriverService {
         Driver currentDriver = getCurrentDriver();
         if (!currentDriver.getAvailable()) throw new RuntimeException("Driver not available!");
 
-        Ride ride = rideService.createNewRide(rideRequest, currentDriver);
+        currentDriver.setAvailable(false);
+        Driver savedDriver = driverRepository.save(currentDriver);
+        Ride ride = rideService.createNewRide(rideRequest, savedDriver);
 
         return modelMapper.map(ride, RideDTO.class);
     }
@@ -50,8 +55,22 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public RideDTO startRide(Long rideID) {
-        return null;
+    public RideDTO startRide(Long rideID, String otp) {
+        Ride ride = rideService.getRideByID(rideID);
+        Driver driver = getCurrentDriver();
+
+        if (!driver.equals(ride.getDriver()))
+            throw new RuntimeException("Driver is not authorized for this ride!");
+
+        if (!ride.getRideStatus().equals(RideStatus.CONFIRMED))
+            throw new RuntimeException("Driver cannot start the ride as it is not confirmed yet!");
+
+        if (!otp.equals(ride.getOtp()))
+            throw new RuntimeException("Invalid OTP Provided!");
+
+        ride.setStartedAt(LocalDateTime.now());
+        Ride savedRide = rideService.updateRideStatus(ride, RideStatus.ONGOING);
+        return modelMapper.map(savedRide, RideDTO.class);
     }
 
     @Override
